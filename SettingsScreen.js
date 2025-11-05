@@ -50,25 +50,35 @@ const SettingsScreen = () => {
   }, []);
 
   const saveChanges = async () => {
-    if (!docRef) {
-      await addDoc(collection(db, "avatars"), {
-        email:userEmail,
-        avatar:url,
-        displayName: displayName
+    try {
+      if (!docRef) {
+        // Create new document if it doesn't exist
+        await addDoc(collection(db, "avatars"), {
+          email: userEmail,
+          avatar: avatar || '',
+        });
+      } else {
+        // Update existing document
+        await setDoc(docRef, 
+                      { email: userEmail, 
+                        avatar: avatar || '', 
+                      });
+      }
+      Toast.show({
+        type: "success",
+        text1: "Changes Saved",
+        text2: "Your changes have been saved 👋", // Subtitle
+        position: "top"
       });
-    } else {
-      await setDoc(docRef, 
-                    { email: userEmail, 
-                      avatar: avatar, 
-                    });
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Failed to save changes. Please try again.",
+        position: "top"
+      });
     }
-    Toast.show({
-      type: "success",
-      text1: "Changes Saved",
-      text2: "Your changes have been saved 👋", // Subtitle
-      position: "top"
-    });
-    navigation.navigate('ListUsers')
   }
 
   return (
